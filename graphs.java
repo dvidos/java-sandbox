@@ -33,13 +33,21 @@ public class Main {
         Graph g = Graph.of(nodes, edges);
         g.print();
         
-        
         // make a breadth first search on a graph
-        System.out.println("Running Breads First Search");
-        g.BreadthFirstSearch(a);
-        System.out.println("Path from a (BFS start) to f: ");
-        g.PrintParentalPathTo(f);
+        Node start = a;
+        Node end = f;
         
+        System.out.println("Running Breadth First Search, starting from " + start.id);
+        g.breadthFirstSearch(start);
+        System.out.println("Path from " + start.id + " (BFS start) to " + end.id);
+        g.printParentalPathTo(end);
+        System.out.println("");
+        g.reset();
+        
+        System.out.println("Running Depth First Search, starting from " + start.id);
+        g.depthFirstSearch(start);
+
+                
         
         // make a depth first search on a graph
         
@@ -63,16 +71,28 @@ class Node {
     public Node parent;
     public Color color;
     public int distance;
+    public int start_timestamp;
+    public int end_timestamp;
     
     public Node(String id) {
         this.id = id;
         this.parent = null;
         this.color = Color.WHITE;
         this.distance = 0;
+        this.start_timestamp = 0;
+        this.end_timestamp = 0;
     }
     
     public static Node of(String id) {
         return new Node(id);
+    }
+    
+    public void reset() {
+        this.parent = null;
+        this.color = Color.WHITE;
+        this.distance = 0;
+        this.start_timestamp = 0;
+        this.end_timestamp = 0;
     }
 }
 class Edge {
@@ -92,14 +112,22 @@ class Edge {
 class Graph {
     public List<Node> nodes;
     public List<Edge> edges;
+    private int timestamp;
     
     public Graph(List<Node> nodes, List<Edge> edges) {
         this.nodes = nodes;
         this.edges = edges;
+        this.timestamp = 0;
     }
     
     public static Graph of(List<Node> nodes, List<Edge> edges) {
         return new Graph(nodes, edges);
+    }
+    
+    public void reset() {
+        for (Node node: nodes) {
+            node.reset();
+        }
     }
     
     public void print() {
@@ -132,7 +160,7 @@ class Graph {
         throw new RuntimeException("Cannot find node with id \"" + id + "\"");
     }
     
-    public void BreadthFirstSearch(Node start) {
+    public void breadthFirstSearch(Node start) {
         ArrayList<Node> candidates = new ArrayList<Node>();
         candidates.add(start);
         
@@ -153,14 +181,15 @@ class Graph {
                     Node neighbor = getNode(exitingEdge.to);
                     if (neighbor.color != Color.WHITE) {
                         System.out.println("  We 've considered this node, ignoring");
-                    } else {
-                        neighbor.distance = current.distance + 1;
-                        neighbor.parent = current;
-                        neighbor.color = Color.GRAY;
-                        
-                        // we'll visit this in the future
-                        candidates.add(neighbor);
+                        continue;
                     }
+                    
+                    neighbor.distance = current.distance + 1;
+                    neighbor.parent = current;
+                    neighbor.color = Color.GRAY;
+                    
+                    // we'll visit this in the future
+                    candidates.add(neighbor);
                 }
             }
             
@@ -169,21 +198,51 @@ class Graph {
         }
     }
     
-    public void PrintParentalPathTo(Node target) {
+    public void printParentalPathTo(Node target) {
         if (target.parent != null) {
-            PrintParentalPathTo(target.parent);
+            printParentalPathTo(target.parent);
         }
         System.out.println("  " + target.id + " (distance: " + target.distance + ")");
     }
     
-    
-    
-    private void breadthFirstSearchInner(Node start, ArrayList<Node> candidates) {
-    }
-    
-    public void DepthFirstSearch(Node start) {
+    public void depthFirstSearch(Node start) {
+        ArrayList<Node> candidates = new ArrayList<Node>();
+        candidates.add(start);
+        timestamp = 0;
         
+        depthFirstSearchFrom(start, null, "");
     }
     
+    private void depthFirstSearchFrom(Node current, Node parent, String prefix) {
+        System.out.println(prefix + "Visiting node " + current.id);
+        
+        // denote consideration color
+        current.start_timestamp = timestamp++;
+        current.color = Color.GRAY;
+        
+        List<Edge> exitingEdges = getEdgesFrom(current.id);
+        if (exitingEdges.size() == 0) {
+            System.out.println(prefix + "  Node " + current.id + " has no exiting edges");
+        } else {
+            for (Edge exitingEdge: exitingEdges) {
+                System.out.println(prefix + "  Considering edge to " + exitingEdge.to);
+                Node neighbor = getNode(exitingEdge.to);
+                if (neighbor.color != Color.WHITE) {
+                    System.out.println(prefix + "  We 've considered this node, ignoring");
+                    continue;
+                }
+                
+                neighbor.distance = parent == null ? 0 : parent.distance + 1;
+                neighbor.parent = current;
+                
+                // let's dive right into this!
+                depthFirstSearchFrom(neighbor, current, prefix + "  +-- ");
+            }
+        }
+        
+        // we are done with this node
+        current.end_timestamp = timestamp++;
+        current.color = Color.BLACK;
+    }
 }
 
