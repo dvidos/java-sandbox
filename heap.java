@@ -25,6 +25,8 @@ public class Main {
 }
 
 
+// maintains the largest element at array[0]
+// not necessarily sorted.
 public class MaxHeap {
 
     int[] array;
@@ -87,6 +89,7 @@ public class MaxHeap {
         }
     }
     
+    // runs in O(n) time complexity
     public void build_heap() {
         // the second half is only leaves without further children
         for (int i = (array.length - 1) / 2; i >= 0; i--) {
