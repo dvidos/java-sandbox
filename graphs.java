@@ -1,5 +1,12 @@
 import java.util.*;
 
+/**
+ * Graphs are arbitrary collections of nodes or vertices, arbitrarily connected through edges.
+ * Edges can be directed or undirected (bidirectional)
+ * In graphs we care about moving from a node to another
+ */
+
+
 
 public class Main {
 
@@ -46,11 +53,17 @@ public class Main {
         
         System.out.println("Running Depth First Search, starting from " + start.id);
         g.depthFirstSearch(start);
+        g.reset();
 
                 
+        // TODO: implement hasPathFromTo()
+        // TODO: make a topological sort (a left-to-right way of traversing the whole graph)
+        //       useful for example in Makefiles or build pipelines, where something has dependencies
+        // TODO: implement discovering of strongly connected components.
         
-        // make a depth first search on a graph
-        
+        // make this more usable, see examples here: https://www.baeldung.com/java-graphs 
+        //                                     and here: https://github.com/google/guava/wiki/GraphsExplained
+      
         
     }
 
@@ -58,7 +71,6 @@ public class Main {
         System.out.println(s);
     }
 }
-
 
 public enum Color {
     BLACK, // visited node
@@ -95,6 +107,7 @@ class Node {
         this.end_timestamp = 0;
     }
 }
+
 class Edge {
     public String from;
     public String to;
@@ -236,7 +249,7 @@ class Graph {
                 neighbor.parent = current;
                 
                 // let's dive right into this!
-                depthFirstSearchFrom(neighbor, current, prefix + "  +-- ");
+                depthFirstSearchFrom(neighbor, current, prefix + "    ");
             }
         }
         
