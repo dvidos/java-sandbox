@@ -36,8 +36,8 @@ interface RBTree {
     public Node predecessor(Node node);  // O(lg n)
     
     public void print();
+    public String debugString();
 }
-
 
 class RBTreeImpl implements RBTree {
     RBTree.Node root;
@@ -58,6 +58,7 @@ class RBTreeImpl implements RBTree {
             target = cmp < 0 ? target.left : target.right;
         }
         
+        // fix pointers appropriately
         node.parent = trailing;
         if (trailing == null) {
             root = node;
@@ -70,6 +71,48 @@ class RBTreeImpl implements RBTree {
     }
     
     public void remove(Node node) {
+        // if node has no children, we simply remove it
+        if (node.left == null && node.right == null) {
+            transplant(node, null);
+        
+        // if node has one child, we elevate the child to the node's position
+        } else if (node.left == null && node.right != null) {
+            transplant(node, node.right);
+        
+        } else if (node.left != null && node.right == null) {
+            transplant(node, node.left);
+                
+        // if node has two children, then we find the node's successor (will be in the right subtree)
+        // to replace the node. The left subtree will be the successor's new left subtree.
+        } else {
+            Node successor = minimumFrom(node.right);
+            if (successor.parent != node) {
+                transplant(successor, successor.right);
+                successor.right = node.right;
+                successor.right.parent = successor;
+            }
+            transplant(node, successor);
+            successor.left = node.left;
+            successor.left.parent = successor;
+        }
+    }
+    
+    private void transplant(Node targetTree, Node newSubtree) {
+        // make parent of targetTree point to newSubtree
+        if (targetTree.parent == null)
+            // targetTree is the root
+            root = newSubtree;
+        else {
+            // targetTree is either a left or right child of its parent
+            if (targetTree == targetTree.parent.left)
+                targetTree.parent.left = newSubtree;
+            else
+                targetTree.parent.right = newSubtree;
+        }
+        
+        // fix parental pointer
+        if (newSubtree != null)
+            newSubtree.parent = targetTree.parent;
     }
     
     public void clear() {
@@ -196,8 +239,26 @@ class RBTreeImpl implements RBTree {
             return;
 
         System.out.println(prefix + side + "\"" + node.key + "\"");
-        printFrom(node.left,  prefix + " .  ", " L  ");
-        printFrom(node.right, prefix + " .  ", " R  ");
+        printFrom(node.left,  prefix + " . ", " L ");
+        printFrom(node.right, prefix + " . ", " R ");
+    }
+    
+    public String debugString() {
+        return debugStringFrom(root);
+    }
+    
+    private String debugStringFrom(Node node) {
+        if (node == null)
+            return "";
+        
+        String s = "(" + node.key + "";
+        if (node.left != null)
+            s += ", L" + debugStringFrom(node.left);
+        if (node.right != null)
+            s += ", R" + debugStringFrom(node.right);
+        s += ")";
+        
+        return s;
     }
 }
 
@@ -235,40 +296,43 @@ class TreeDemo {
         tree.add(new RBTree.Node("b"));
         tree.add(new RBTree.Node("g"));
         tree.add(new RBTree.Node("a"));
+        tree.add(new RBTree.Node("e"));
         tree.add(new RBTree.Node("c"));
         tree.add(new RBTree.Node("d"));
         tree.add(new RBTree.Node("i"));
         
-        System.out.println("Printing Tree");
-        tree.print();
+        System.out.println("Debug Representation: " + tree.debugString());
         
-        System.out.println("Pre Order Traversing");
-        tree.preOrderTraverse(n -> System.out.println("- " + n.key));
+        System.out.print("Pre Order Traversing:");
+        tree.preOrderTraverse(n -> System.out.print(" " + n.key));
+        System.out.println("");
         
-        System.out.println("In Order Traversing");
-        tree.inOrderTraverse(n -> System.out.println("- " + n.key));
+        System.out.print("In Order Traversing:");
+        tree.inOrderTraverse(n -> System.out.print(" " + n.key));
+        System.out.println("");
         
-        System.out.println("Post Order Traversing");
-        tree.postOrderTraverse(n -> System.out.println("- " + n.key));
+        System.out.print("Post Order Traversing:");
+        tree.postOrderTraverse(n -> System.out.print(" " + n.key));
+        System.out.println("");
         
         RBTree.Node n;
         
-        System.out.println("Minimum + Successor Traversing (increasing order)");
+        System.out.print("Minimum & Successor Traversing:");
         n = tree.minimum();
         while (n != null) {
-            System.out.println("- " + n.key);
+            System.out.print(" " + n.key);
             n = tree.successor(n);
         }
-        //pause();
+        System.out.println("");
         
         
-        System.out.println("Maximum + Predecessor Traversing (decreasing order)");
+        System.out.print("Maximum & Predecessor Traversing:");
         n = tree.maximum();
         while (n != null) {
-            System.out.println("- " + n.key);
+            System.out.print(" " + n.key);
             n = tree.predecessor(n);
         }
-        //pause();
+        System.out.println("");
     }
     
     private void pause() {
