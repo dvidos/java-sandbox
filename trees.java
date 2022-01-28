@@ -15,16 +15,13 @@ public class Trees {
     }
 }
 
-interface RBTree {
-    class Node { 
-        public Node(String key) {
-            this.key = key;
-        }
-        String key;
-        String value;
-        Node parent, left, right;
-    }
-    
+class Node { 
+    public Node(String key) { this.key = key; }
+    String key;
+    Node parent, left, right;
+}
+
+interface Tree {
     public void add(Node n);
     public void remove(Node n);
     public void clear();
@@ -41,12 +38,13 @@ interface RBTree {
     
     public void print();
     public String debugString();
+    public int maxHeight();
 }
 
-class RBTreeImpl implements RBTree {
-    RBTree.Node root;
+class TreeImpl implements Tree {
+    Node root;
     
-    public RBTreeImpl() {
+    public TreeImpl() {
         root = null;
     }
     
@@ -267,12 +265,32 @@ class RBTreeImpl implements RBTree {
         
         return s;
     }
+    
+    public int maxHeight() {
+        return maxHeightFrom(root);
+    }
+    
+    private int maxHeightFrom(Node node) {
+        if (node == null)
+            return 0;
+           
+        int leftHeight = 0;
+        int rightHeight = 0;
+        
+        if (node.left != null)
+            leftHeight = 1 + maxHeightFrom(node.left);
+           
+        if (node.right != null)
+            rightHeight = 1 + maxHeightFrom(node.right);
+        
+        return Math.max(leftHeight, rightHeight);
+    }
 }
 
-class RBTreeBuilder {
+class TreeBuilder {
     Random rand = new Random();
     
-    public RBTree buildLargeRandomTree(int size) {
+    public Tree buildLargeRandomTree(int size) {
         return null;
     }
     
@@ -290,22 +308,37 @@ class RBTreeBuilder {
         return rand.nextInt(maxValue);
     }
     
-    public RBTree.Node randomNode() {
-        return new RBTree.Node(randomString(10));
+    public Node randomNode() {
+        return new Node(randomString(10));
+    }
+    
+    public Tree randomTree(int nodes) {
+        Tree tree = new TreeImpl();
+        while (nodes-- > 0) {
+            tree.add(new Node(randomString(10)));
+        }
+        return tree;
     }
 }
 
 class TreeDemo {
     public void runDemo() {
-        RBTree tree = new RBTreeImpl();
-        RBTreeBuilder builder = new RBTreeBuilder();
-        for (int i = 0; i < 300; i++) {
-            tree.add(builder.randomNode());
-        }
-        tree.print();
+        demoHeight(0);
+        demoHeight(1);
+        demoHeight(3);
+        demoHeight(10);
+        demoHeight(30);
+        demoHeight(100);
+        demoHeight(1000);
+        demoHeight(10000);
         
+        
+        Tree tree;
+        TreeBuilder builder = new TreeBuilder();
+        tree = builder.randomTree(17);
+        tree.print();
         System.out.println("Increasing order traversing");
-        RBTree.Node n = tree.minimum();
+        Node n = tree.minimum();
         while (n != null) {
             System.out.println("- " + n.key);
             n = tree.successor(n);
@@ -313,13 +346,19 @@ class TreeDemo {
         
     }
     
+    private void demoHeight(int nodes) {
+        TreeBuilder builder = new TreeBuilder();
+        Tree tree = builder.randomTree(nodes);
+        System.out.println("A tree of " + nodes + " nodes has a max height of " + tree.maxHeight());
+    }
+    
     public void runTests() {
-        RBTree.Node a = new RBTree.Node("a");
-        RBTree.Node b = new RBTree.Node("b");
-        RBTree.Node c = new RBTree.Node("c");
-        RBTree.Node d = new RBTree.Node("d");
+        Node a = new Node("a");
+        Node b = new Node("b");
+        Node c = new Node("c");
+        Node d = new Node("d");
         
-        RBTree tree = new RBTreeImpl();
+        Tree tree = new TreeImpl();
         assertEquals("", tree.debugString());
         
         tree.add(b);
@@ -363,7 +402,7 @@ class TreeDemo {
         tree.postOrderTraverse(n -> steps.append(n.key));
         assertEquals("adcb", steps.toString());
         
-        RBTree.Node m;
+        Node m;
         
         m = tree.minimum();
         assertEquals("a", m.key);
