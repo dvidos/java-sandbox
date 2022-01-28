@@ -8,7 +8,11 @@ import java.io.IOException;
  * is always h = lg n.
  */
 public class Trees {
-    public static void main(String[] args) { (new TreeDemo()).run(); }
+    public static void main(String[] args) {
+        TreeDemo demo = new TreeDemo();
+        demo.runTests();
+        demo.runDemo();
+    }
 }
 
 interface RBTree {
@@ -60,6 +64,9 @@ class RBTreeImpl implements RBTree {
         
         // fix pointers appropriately
         node.parent = trailing;
+        node.left = null;
+        node.right = null;
+        
         if (trailing == null) {
             root = node;
         } else {
@@ -282,64 +289,130 @@ class RBTreeBuilder {
     public int randomInt(int maxValue) {
         return rand.nextInt(maxValue);
     }
+    
+    public RBTree.Node randomNode() {
+        return new RBTree.Node(randomString(10));
+    }
 }
 
 class TreeDemo {
-    public void run() {
-        // generate random trees
-        // add, remove, 
-        // test searching,
-        // test traversing
+    public void runDemo() {
         RBTree tree = new RBTreeImpl();
-        tree.add(new RBTree.Node("f"));
-        tree.add(new RBTree.Node("h"));
-        tree.add(new RBTree.Node("b"));
-        tree.add(new RBTree.Node("g"));
-        tree.add(new RBTree.Node("a"));
-        tree.add(new RBTree.Node("e"));
-        tree.add(new RBTree.Node("c"));
-        tree.add(new RBTree.Node("d"));
-        tree.add(new RBTree.Node("i"));
+        RBTreeBuilder builder = new RBTreeBuilder();
+        for (int i = 0; i < 300; i++) {
+            tree.add(builder.randomNode());
+        }
+        tree.print();
         
-        System.out.println("Debug Representation: " + tree.debugString());
-        
-        System.out.print("Pre Order Traversing:");
-        tree.preOrderTraverse(n -> System.out.print(" " + n.key));
-        System.out.println("");
-        
-        System.out.print("In Order Traversing:");
-        tree.inOrderTraverse(n -> System.out.print(" " + n.key));
-        System.out.println("");
-        
-        System.out.print("Post Order Traversing:");
-        tree.postOrderTraverse(n -> System.out.print(" " + n.key));
-        System.out.println("");
-        
-        RBTree.Node n;
-        
-        System.out.print("Minimum & Successor Traversing:");
-        n = tree.minimum();
+        System.out.println("Increasing order traversing");
+        RBTree.Node n = tree.minimum();
         while (n != null) {
-            System.out.print(" " + n.key);
+            System.out.println("- " + n.key);
             n = tree.successor(n);
         }
-        System.out.println("");
         
-        
-        System.out.print("Maximum & Predecessor Traversing:");
-        n = tree.maximum();
-        while (n != null) {
-            System.out.print(" " + n.key);
-            n = tree.predecessor(n);
-        }
-        System.out.println("");
     }
     
+    public void runTests() {
+        RBTree.Node a = new RBTree.Node("a");
+        RBTree.Node b = new RBTree.Node("b");
+        RBTree.Node c = new RBTree.Node("c");
+        RBTree.Node d = new RBTree.Node("d");
+        
+        RBTree tree = new RBTreeImpl();
+        assertEquals("", tree.debugString());
+        
+        tree.add(b);
+        assertEquals("(b)", tree.debugString());
+        
+        tree.remove(b);
+        assertEquals("", tree.debugString());
+        
+        tree.add(b);
+        tree.add(a);
+        tree.add(d);
+        assertEquals("(b, L(a), R(d))", tree.debugString());
+        
+        tree.remove(a);
+        assertEquals("(b, R(d))", tree.debugString());
+        
+        tree.add(c);
+        tree.add(a);
+        assertEquals("(b, L(a), R(d, L(c)))", tree.debugString());
+        
+        tree.remove(d);
+        assertEquals("(b, L(a), R(c))", tree.debugString());
+        tree.remove(c);
+        tree.add(d);
+        tree.add(c);
+        assertEquals("(b, L(a), R(d, L(c)))", tree.debugString());
+        
+        // validate traversing methods
+        
+        final StringBuilder steps = new StringBuilder();
+        
+        steps.setLength(0);
+        tree.preOrderTraverse(n -> steps.append(n.key));
+        assertEquals("badc", steps.toString());
+        
+        steps.setLength(0);
+        tree.inOrderTraverse(n -> steps.append(n.key));
+        assertEquals("abdc", steps.toString());
+        
+        steps.setLength(0);
+        tree.postOrderTraverse(n -> steps.append(n.key));
+        assertEquals("adcb", steps.toString());
+        
+        RBTree.Node m;
+        
+        m = tree.minimum();
+        assertEquals("a", m.key);
+        
+        m = tree.successor(m);
+        assertEquals("b", m.key);
+        
+        m = tree.successor(m);
+        assertEquals("c", m.key);
+        
+        m = tree.successor(m);
+        assertEquals("d", m.key);
+        
+        m = tree.maximum();
+        assertEquals("d", m.key);
+        
+        m = tree.predecessor(m);
+        assertEquals("c", m.key);
+        
+        m = tree.predecessor(m);
+        assertEquals("b", m.key);
+        
+        m = tree.predecessor(m);
+        assertEquals("a", m.key);
+        
+        System.out.println("Tests finished successfully");
+    }
     private void pause() {
         try {
             System.in.read();
         } catch (Exception e) {
         }
+    }
+    
+    
+    private void assertEquals(String expected, String value) {
+        if (value == null && expected != null)
+            throw new RuntimeException("Assertion failed, was expecting \"" + expected + "\", got null instead");
+        
+        if (value != null && expected == null)
+            throw new RuntimeException("Assertion failed, was expecting null, got \"" + value + "\" instead");
+        
+        if (!value.equals(expected))
+            throw new RuntimeException("Assertion failed, was expecting \"" + expected + "\", got \"" + value + "\" instead");
+    }
+    
+    private void assertEquals(int expected, int value) {
+        if (value != expected)
+            throw new RuntimeException("Assertion failed, was expecting " + expected + ", got " + value + " instead");
     }
 }
 
