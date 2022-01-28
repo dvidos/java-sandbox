@@ -15,12 +15,6 @@ public class Trees {
     }
 }
 
-class Node { 
-    public Node(String key) { this.key = key; }
-    String key;
-    Node parent, left, right;
-}
-
 interface Tree {
     public void add(Node n);
     public void remove(Node n);
@@ -39,6 +33,12 @@ interface Tree {
     public void print();
     public String debugString();
     public int maxHeight();
+}
+
+class Node { 
+    public Node(String key) { this.key = key; }
+    String key;
+    Node parent, left, right;
 }
 
 class TreeImpl implements Tree {
@@ -323,7 +323,6 @@ class TreeBuilder {
 
 class TreeDemo {
     public void runDemo() {
-        demoHeight(0);
         demoHeight(1);
         demoHeight(3);
         demoHeight(10);
@@ -331,7 +330,6 @@ class TreeDemo {
         demoHeight(100);
         demoHeight(1000);
         demoHeight(10000);
-        
         
         Tree tree;
         TreeBuilder builder = new TreeBuilder();
@@ -343,13 +341,13 @@ class TreeDemo {
             System.out.println("- " + n.key);
             n = tree.successor(n);
         }
-        
     }
     
     private void demoHeight(int nodes) {
         TreeBuilder builder = new TreeBuilder();
         Tree tree = builder.randomTree(nodes);
-        System.out.println("A tree of " + nodes + " nodes has a max height of " + tree.maxHeight());
+        System.out.println("A tree of " + nodes + " nodes has a max height of " + tree.maxHeight() + 
+                ", ideally log2(" + nodes + ") is " + ((int)(Math.log(nodes) / Math.log(2))));
     }
     
     public void runTests() {
