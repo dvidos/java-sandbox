@@ -402,9 +402,7 @@ class GraphDemo {
         g.addEdge("f", "g");
         assertEquals("a[b,c] b[c] c[d] d[] f[g] g[]", g.debugString());
         
-        
         System.out.println("Tests finished successfully");
-        
     }
     
     public void runDemo() {
@@ -418,7 +416,9 @@ class GraphDemo {
         g.addEdge("b", "b2");
         g.addEdge("c", "c1");
         g.addEdge("c", "c2");
-        g.addEdge("c2", "d");
+        g.addEdge("c2", "c2");
+        g.addEdge("c2", "c2a");
+        g.addEdge("c2", "c2b");
         g.addEdge("a", "d");
         g.addEdge("e", "f");
         

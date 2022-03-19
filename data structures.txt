@@ -1,0 +1,17 @@
+- Sets (contains, add, remove)
+- Min/Max Heap (organize data so that getting largest item is O(1). Heaping is O(n) operation)
+- Heapsort algorithm (grab largest object each time, O(n^2))
+- Priority Queue (based on heapsort)
+- Quick Sort algorithm (divide and conquer)
+- Minimum, maximum of a set (in O(n))
+- Retrieve n-th largest/smallest element (like quicksort, but only half processing)
+- Hashtable (using hashing to derive storing index)
+- Binary Search Tree (fast search in O(h))
+- Red-Black trees (balanced, to guarantee O(h) worst case)
+- Longest common subsequence algorithm (DP)
+[...]
+- Graphs (DFS, BFS, topological sort, strongly connected components)
+- Minimum spanning trees (to cover a graph)
+
+
+
